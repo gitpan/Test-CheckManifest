@@ -9,7 +9,7 @@ use Cwd;
 use base qw(Exporter);
 
 our @EXPORT = qw(ok_manifest);
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 my $test = Test::Builder->new();
 
@@ -24,7 +24,7 @@ sub ok_manifest{
     
     unless( open(my $fh,'<',$manifest) ){
         $bool = 0;
-    $msg  = "can't open $manifest";
+        $msg  = "can't open $manifest";
     }
     else{
         my @files = <$fh>;
@@ -33,14 +33,14 @@ sub ok_manifest{
         chomp @files;
     
         for my $tfile(@files){
+            $tfile = (split(/\s{2,}/,$tfile,2))[0];
             $tfile = Cwd::realpath($home . '/' . $tfile);
         }
     
         my @dir_files;
         find(sub{push(@dir_files,Cwd::realpath($File::Find::name)) if -f $File::Find::name 
                                                                      and $File::Find::name !~ m!/blib/!
-                                                                     and $_ ne 'pm_to_blib'
-                                                                     and $_ ne 'Makefile';},$home);
+                                                                     and !_is_excluded($_)},$home);
     
         CHECK: for my $file(@dir_files){
             for my $check(@files){
@@ -52,10 +52,17 @@ sub ok_manifest{
     }
     
     my $diag = 'The following files are not named in the MANIFEST file: '.
-               join(',',@missing_files);
+               join(', ',@missing_files);
     
     $test->cmp_ok($bool,'==',1,$msg);
     $test->diag($diag) if scalar(@missing_files) >= 1;
+}
+
+sub _is_excluded{
+    my ($file) = @_;
+    my @excluded_files = qw(pm_to_blib Makefile META.yml);
+    
+    return scalar grep{$_ eq $file}@excluded_files;
 }
 
 1;
