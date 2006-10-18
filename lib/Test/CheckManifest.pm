@@ -9,7 +9,7 @@ use Cwd;
 use base qw(Exporter);
 
 our @EXPORT = qw(ok_manifest);
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 my $test = Test::Builder->new();
 
@@ -17,8 +17,8 @@ sub ok_manifest{
     my ($msg)    = @_;
     
     my $bool     = 1;
-    my $home     = $FindBin::Bin . '/..';
-    my $manifest = $home . '/MANIFEST';
+    my $home     = Cwd::realpath($FindBin::Bin . '/..');    
+    my $manifest = Cwd::realpath($home . '/MANIFEST');
     
     my @missing_files = ();
     
@@ -41,7 +41,6 @@ sub ok_manifest{
         find(sub{push(@dir_files,Cwd::realpath($File::Find::name)) if -f $File::Find::name 
                                                                      and $File::Find::name !~ m!/blib/!
                                                                      and !_is_excluded($_)},$home);
-    
         CHECK: for my $file(@dir_files){
             for my $check(@files){
                 next CHECK if $file eq $check;
@@ -75,7 +74,7 @@ Test::CheckManifest - Check if your Manifest matches your distro
 =head1 SYNOPSIS
 
   use Test::CheckManifest;
-  check_manifest();
+  ok_manifest();
 
 =head1 DESCRIPTION
 
