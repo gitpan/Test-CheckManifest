@@ -9,7 +9,7 @@ use Cwd;
 use base qw(Exporter);
 
 our @EXPORT = qw(ok_manifest);
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 my $test = Test::Builder->new();
 
@@ -32,6 +32,11 @@ sub ok_manifest{
     
         chomp @files;
     
+        {
+            local $/ = "\r";
+            chomp @files;
+        }
+    
         for my $tfile(@files){
             $tfile = (split(/\s{2,}/,$tfile,2))[0];
             $tfile = Cwd::realpath($home . '/' . $tfile);
@@ -41,6 +46,8 @@ sub ok_manifest{
         find(sub{push(@dir_files,Cwd::realpath($File::Find::name)) if -f $File::Find::name 
                                                                      and $File::Find::name !~ m!/blib/!
                                                                      and !_is_excluded($_)},$home);
+
+        #print STDERR Dumper(\@files,\@dir_files);
         CHECK: for my $file(@dir_files){
             for my $check(@files){
                 next CHECK if $file eq $check;

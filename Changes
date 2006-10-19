@@ -5,3 +5,11 @@ Revision history for Perl extension Test::CheckManifest.
         -XA -n Test::CheckManifest
       + added tests for Pod coverage, Pod, Manifest
 
+0.2  
+      - bugfix: some files excluded from test
+
+0.3   Wed Oct 18 21:36:32
+      - bugfix: CheckManifest works under Solaris now
+
+0.4   Thu Oct 19 10:47:27
+      - bugfix: handles different newlines (mac, win, *nix)
