@@ -6,21 +6,30 @@ use FindBin ();
 use Test::Builder;
 use File::Find;
 use Cwd;
+use Carp;
 use base qw(Exporter);
 
 our @EXPORT = qw(ok_manifest);
-our $VERSION = '0.4';
+our $VERSION = '0.5';
 
 my $test = Test::Builder->new();
 
 sub ok_manifest{
-    my ($msg)    = @_;
+    my ($hashref,$msg)    = @_;
+    
+    $msg = $hashref unless ref $hashref;
     
     my $bool     = 1;
     my $home     = Cwd::realpath($FindBin::Bin . '/..');    
     my $manifest = Cwd::realpath($home . '/MANIFEST');
     
     my @missing_files = ();
+    my $arref         = $hashref->{exclude} || [];
+    
+    for(@$arref){
+        croak 'path in excluded array must be "absolut"' unless m!^/!;
+        $_ = Cwd::realpath($home . $_);
+    }
     
     unless( open(my $fh,'<',$manifest) ){
         $bool = 0;
@@ -43,9 +52,11 @@ sub ok_manifest{
         }
     
         my @dir_files;
-        find(sub{push(@dir_files,Cwd::realpath($File::Find::name)) if -f $File::Find::name 
+        find({no_chdir => 1,
+          wanted   => sub{ my $file = $File::Find::name;
+                           push(@dir_files,Cwd::realpath($file)) if -f $File::Find::name 
                                                                      and $File::Find::name !~ m!/blib/!
-                                                                     and !_is_excluded($_)},$home);
+                                                                     and !_is_excluded($_,$arref)}},$home);
 
         #print STDERR Dumper(\@files,\@dir_files);
         CHECK: for my $file(@dir_files){
@@ -65,10 +76,13 @@ sub ok_manifest{
 }
 
 sub _is_excluded{
-    my ($file) = @_;
+    my ($file,$dirref) = @_;
     my @excluded_files = qw(pm_to_blib Makefile META.yml);
+        
+    my @matches = grep{$file =~ /$_$/    }@excluded_files;
+    push @matches, grep{$file =~ /^\Q$_\E/ }@$dirref;
     
-    return scalar grep{$_ eq $file}@excluded_files;
+    return scalar @matches;
 }
 
 1;
@@ -93,12 +107,21 @@ There is only one method exported: C<ok_manifest>
 
 =head1 METHODS
 
-=head2 ok_manifest [$msg]
+=head2 ok_manifest   [{exlude => $arref}][$msg]
 
 checks whether the Manifest file matches the distro or not. To match a distro
 the Manifest has to name all files that come along with the distribution.
 
 To check the Manifest file, this module searches for a file named C<MANIFEST>.
+
+To exclude some directories from this test, you can specify these dirs in the
+hashref.
+
+  ok_manifest({exclude => ['/var/test/']});
+
+is ok if the files in C</path/to/your/dist/var/test/> are not named in the
+C<MANIFEST> file. That means that the paths in the exclude array must be
+"pseudo-absolute" (absolute to your distribution).
 
 =head1 AUTHOR
 
