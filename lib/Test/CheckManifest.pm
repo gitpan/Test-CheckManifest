@@ -10,7 +10,7 @@ use Carp;
 use base qw(Exporter);
 
 our @EXPORT = qw(ok_manifest);
-our $VERSION = '0.5';
+our $VERSION = '0.6';
 
 my $test = Test::Builder->new();
 

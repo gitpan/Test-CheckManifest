@@ -18,3 +18,6 @@ Revision history for Perl extension Test::CheckManifest.
       - bugfix: T::CM now works under taint mode (http://rt.cpan.org/Public/Bug/Display.html?id=22927)
       + added : ok_manifest execpts hashref where specific dirs can be excluded
                 from test
+
+0.6   Tue Nov 21 22:22:22 2006
+       Test scripts improved
