@@ -1,11 +1,16 @@
 # http://module-build.sourceforge.net/META-spec.html
 #XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
 name:         Test-CheckManifest
-version:      0.6
+version:      0.7
 version_from: lib/Test/CheckManifest.pm
 installdirs:  site
 requires:
+    Carp:                          0
+    Cwd:                           0
+    File::Basename:                0
+    File::Find:                    0
+    File::Spec:                    0
     Test::Builder:                 0
 
 distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30
+generated_by: ExtUtils::MakeMaker version 6.17

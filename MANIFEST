@@ -5,5 +5,6 @@ README
 t/Test-CheckManifest.t
 t/CheckManifest_Pod.t
 t/CheckManifest_Pod_Coverage.t
+t/98_boilerplate.t
 lib/Test/CheckManifest.pm
 META.yml                                 Module meta-data (added by MakeMaker)

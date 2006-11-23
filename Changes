@@ -16,8 +16,14 @@ Revision history for Perl extension Test::CheckManifest.
       
 0.5   Sat Nov 18 18:00:00
       - bugfix: T::CM now works under taint mode (http://rt.cpan.org/Public/Bug/Display.html?id=22927)
-      + added : ok_manifest execpts hashref where specific dirs can be excluded
+      + added : ok_manifest accepts hashref where specific dirs can be excluded
                 from test
 
 0.6   Tue Nov 21 22:22:22 2006
-       Test scripts improved
+        Test scripts improved
+
+0.7   Thu Nov 23 12:58:54 2006
+      + added: "filter" to exclude files that match on specific regexp from test
+               (http://rt.cpan.org/Public/Bug/Display.html?id=23529)
+      + added: "bool" to combine "filter" and "exclude"
+      + added: boilerplate.t

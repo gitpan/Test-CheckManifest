@@ -2,34 +2,66 @@ package Test::CheckManifest;
 
 use strict;
 use warnings;
-use FindBin ();
+use File::Spec;
+use File::Basename;
 use Test::Builder;
 use File::Find;
 use Cwd;
 use Carp;
-use base qw(Exporter);
 
-our @EXPORT = qw(ok_manifest);
-our $VERSION = '0.6';
+use Data::Dumper;
+
+our $VERSION = '0.7';
 
 my $test = Test::Builder->new();
+my $test_bool = 1;
+
+sub import {
+    my $self = shift;
+    my $caller = caller;
+
+    for my $func ( qw( ok_manifest ) ) {
+        no strict 'refs';
+        *{$caller."::".$func} = \&$func;
+    }
+
+    $test->exported_to($caller);
+}
 
 sub ok_manifest{
     my ($hashref,$msg)    = @_;
     
-    $msg = $hashref unless ref $hashref;
+    my $is_hashref = 1;
+    $is_hashref = 0 unless ref $hashref;
+    
+    $msg = $hashref unless $is_hashref;
     
     my $bool     = 1;
-    my $home     = Cwd::realpath($FindBin::Bin . '/..');    
+    my $dir      =
+    my $home     = Cwd::realpath(dirname(File::Spec->rel2abs($0)) . '/..');    
     my $manifest = Cwd::realpath($home . '/MANIFEST');
     
     my @missing_files = ();
-    my $arref         = $hashref->{exclude} || [];
+    my $arref         = ['/blib'];
+    my $filter        = $is_hashref ? $hashref->{filter}  : [];
+    my $comb          = $is_hashref && 
+                        $hashref->{bool} && 
+                        $hashref->{bool} =~ m/^and$/i ?
+                               'and' :
+    			       'or'; 
+			       
+    push @$arref, @{$hashref->{exclude}} if($is_hashref and
+                                            exists $hashref->{exclude} and 
+                                            ref $hashref->{exclude} eq 'ARRAY');
     
     for(@$arref){
         croak 'path in excluded array must be "absolut"' unless m!^/!;
-        $_ = Cwd::realpath($home . $_);
+	my $path = $home . $_;
+        $_ = Cwd::realpath($path);
+	croak "invalid path: $path" unless defined;
     }
+    
+    @$arref = grep { defined }@$arref;
     
     unless( open(my $fh,'<',$manifest) ){
         $bool = 0;
@@ -52,11 +84,11 @@ sub ok_manifest{
         }
     
         my @dir_files;
+	
         find({no_chdir => 1,
           wanted   => sub{ my $file = $File::Find::name;
                            push(@dir_files,Cwd::realpath($file)) if -f $File::Find::name 
-                                                                     and $File::Find::name !~ m!/blib/!
-                                                                     and !_is_excluded($_,$arref)}},$home);
+                                                                     and !_is_excluded($_,$arref,$filter,$comb)}},$home);
 
         #print STDERR Dumper(\@files,\@dir_files);
         CHECK: for my $file(@dir_files){
@@ -65,22 +97,37 @@ sub ok_manifest{
             }
             push(@missing_files,$file);
             $bool = 0;
-        }
+        }	
     }
     
     my $diag = 'The following files are not named in the MANIFEST file: '.
                join(', ',@missing_files);
     
-    $test->cmp_ok($bool,'==',1,$msg);
-    $test->diag($diag) if scalar(@missing_files) >= 1;
+    $test->is_num($test_bool,$bool,$msg);
+    $test->diag($diag) if scalar(@missing_files) >= 1 and $test_bool == 1;
+}
+
+sub _not_ok_manifest{
+    $test_bool = 0;
+    ok_manifest(@_);
 }
 
 sub _is_excluded{
-    my ($file,$dirref) = @_;
+    my ($file,$dirref,$filter,$bool) = @_;
     my @excluded_files = qw(pm_to_blib Makefile META.yml);
         
-    my @matches = grep{$file =~ /$_$/    }@excluded_files;
-    push @matches, grep{$file =~ /^\Q$_\E/ }@$dirref;
+    my   @matches = grep{$file =~ /$_$/    }@excluded_files;
+    
+    if($bool eq 'or'){
+        push @matches, $file if grep{ref $_ and ref $_ =~ /Regexp/ and $file =~ $_}@$filter;
+        push @matches, $file if grep{not ref $_ and $file =~ /^\Q$_\E/}@$dirref;
+    }
+    else{
+        if(grep{$file =~ $_ and ref $_ and ref $_ =~ /Regexp/}@$filter and
+	   grep{$file =~ /^\Q$_\E/ and not ref $_}@$dirref){
+	    push @matches, $file;
+	}
+    }
     
     return scalar @matches;
 }
@@ -122,6 +169,51 @@ hashref.
 is ok if the files in C</path/to/your/dist/var/test/> are not named in the
 C<MANIFEST> file. That means that the paths in the exclude array must be
 "pseudo-absolute" (absolute to your distribution).
+
+To use a "filter" you can use the key "filter"
+
+  ok_manifest({filter => [qr/\.svn/]});
+
+With that you can exclude all files with an '.svn' in the filename or in the
+path from the test.
+
+These files would be excluded (as examples):
+
+=over 4
+
+=item * /dist/var/.svn/test
+
+=item * /dist/lib/test.svn
+
+=back
+
+You can also combine "filter" and "exclude" with 'and' or 'or' default is 'or':
+
+  ok_manifest({exclude => ['/var/test'], 
+               filter  => [qr/\.svn/], 
+	       bool    => 'and'});
+
+These files have to be named in the C<MANIFEST>:
+
+=over 4
+
+=item * /var/foo/.svn/any.file
+
+=item * /dist/t/file.svn
+
+=item * /var/test/test.txt
+
+=back
+
+These files not:
+
+=over 4
+
+=item * /var/test/.svn/*
+
+=item * /var/test/file.svn
+
+=back
 
 =head1 AUTHOR
 
