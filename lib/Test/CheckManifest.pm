@@ -2,16 +2,15 @@ package Test::CheckManifest;
 
 use strict;
 use warnings;
+
+use Cwd;
+use Carp;
 use File::Spec;
 use File::Basename;
 use Test::Builder;
 use File::Find;
-use Cwd;
-use Carp;
 
-use Data::Dumper;
-
-our $VERSION = '0.7';
+our $VERSION = '0.8';
 
 my $test = Test::Builder->new();
 my $test_bool = 1;
@@ -42,6 +41,7 @@ sub ok_manifest{
     my $manifest = Cwd::realpath($home . '/MANIFEST');
     
     my @missing_files = ();
+    my @files_plus    = ();
     my $arref         = ['/blib'];
     my $filter        = $is_hashref ? $hashref->{filter}  : [];
     my $comb          = $is_hashref && 
@@ -83,28 +83,43 @@ sub ok_manifest{
             $tfile = Cwd::realpath($home . '/' . $tfile);
         }
     
-        my @dir_files;
+        my (@dir_files,%files_hash,%excluded);
+	@files_hash{@files} = ();
 	
         find({no_chdir => 1,
-          wanted   => sub{ my $file = $File::Find::name;
+          wanted   => sub{ my $file         = $File::Find::name;
+	                   my $is_excluded  = _is_excluded($_,$arref,$filter,$comb);
                            push(@dir_files,Cwd::realpath($file)) if -f $File::Find::name 
-                                                                     and !_is_excluded($_,$arref,$filter,$comb)}},$home);
+                                                                    and !$is_excluded;
+                           $excluded{$file} = 1 if -f $File::Find::name 
+			                           and $is_excluded}},$home);
 
+	
         #print STDERR Dumper(\@files,\@dir_files);
         CHECK: for my $file(@dir_files){
             for my $check(@files){
-                next CHECK if $file eq $check;
+	        if($file eq $check){
+		    delete $files_hash{$check};
+                    next CHECK;
+		}
             }
             push(@missing_files,$file);
             $bool = 0;
-        }	
+        }
+	
+	delete $files_hash{$_} for keys %excluded;
+	@files_plus = keys %files_hash;
+	$bool = 0 if scalar @files_plus > 0;	
     }
     
     my $diag = 'The following files are not named in the MANIFEST file: '.
                join(', ',@missing_files);
+    my $plus = 'The following files are not part of distro but named in the MANIFEST file: '.
+               join(', ',@files_plus);
     
     $test->is_num($test_bool,$bool,$msg);
-    $test->diag($diag) if scalar(@missing_files) >= 1 and $test_bool == 1;
+    $test->diag($diag) if scalar @missing_files >= 1 and $test_bool == 1;
+    $test->diag($plus) if scalar @files_plus    >= 1 and $test_bool == 1;
 }
 
 sub _not_ok_manifest{

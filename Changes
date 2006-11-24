@@ -27,3 +27,6 @@ Revision history for Perl extension Test::CheckManifest.
                (http://rt.cpan.org/Public/Bug/Display.html?id=23529)
       + added: "bool" to combine "filter" and "exclude"
       + added: boilerplate.t
+
+0.8   Fri Nov 24 09:17:10 2006
+      + added: T::CM now tests on files that are not part of the distro but named in the MANIFEST
