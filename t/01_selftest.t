@@ -4,16 +4,20 @@ use strict;
 use warnings;
 use File::Spec;
 use File::Basename;
-use Test::More tests => 10;
+use Test::More;
 
-use_ok('Test::CheckManifest');
+eval "use Test::CheckManifest tests => 10";
+plan skip_all => "Test::CheckManifest required" if $@;
+
 ok_manifest();
 
 # create a directory and a file 
 my $home = dirname(File::Spec->rel2abs($0));
 
+
+
 # untaint
-if ($home =~ /^([-\@\w.\/\\]+)$/) {
+if ($home =~ /^([-\@\w.\/\\: ]+)$/) {
     $home = $1;
 } 
 else {
@@ -22,11 +26,11 @@ else {
 
 my $dir  = $home . '/.svn/';
 my $dir2 = $home . '/test/';
+my ($file1,$file2,$file3) = ($dir.'test.txt', $home . '/test.svn', $dir2.'hallo.txt');
 
 mkdir $dir;
 
 my $fh;
-my ($file1,$file2,$file3) = ($dir.'test.txt', $home . '/test.svn', $dir2.'hallo.txt');
 open $fh ,'>',$file1 and close $fh;
 open $fh ,'>',$file2 and close $fh;
 
@@ -41,11 +45,15 @@ Test::CheckManifest::_not_ok_manifest({exclude => ['/t/.svn/']},'expected: Manif
 Test::CheckManifest::_not_ok_manifest({filter => [qr/\.svn/], exclude => ['/t/.svn/']},'expected: Manifest not ok (exclude OR filter)');
 Test::CheckManifest::_not_ok_manifest({filter  => [qr/\.svn/],
                                        bool    => 'and',
-                                       exclude => ['/test']}, 'filter AND exclude');
+                                       exclude => ['/t/test']}, 'filter AND exclude');
 ok_manifest({filter  => [qr/\.svn/],
-             exclude => ['/test']}, 'filter OR exclude');
+             exclude => ['/t/test']}, 'filter OR exclude');
 
-unlink $file1, $file2, $file3;
+unlink $file3;
+
+ok_manifest({filter => [qr/\.svn/]},'Filter \.svn');
+
+unlink $file2, $file1;
 rmdir  $dir;
 rmdir  $dir2;
 

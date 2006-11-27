@@ -29,4 +29,13 @@ Revision history for Perl extension Test::CheckManifest.
       + added: boilerplate.t
 
 0.8   Fri Nov 24 09:17:10 2006
-      + added: T::CM now tests on files that are not part of the distro but named in the MANIFEST
+      + added: T::CM now tests also on files that are not part of the distro but named in the MANIFEST
+
+0.9   Mon Nov 27 09:35:26 2006
+      - bugfix: ok_manifest files without blib (http://rt.cpan.org/Public/Bug/Display.html?id=23580)
+      - bugfix: Test-CheckManifest.t  -- added ':' in character group (untaint $home)
+      - bugfix: 99_pod_coverage.t -- removed all_modules and now T::P::C 1.08 or higher is required
+      - bugfix: ref $_ --> ref($_)
+      - bugfix: "filter" to exclude files that match on specific regexp from test
+                (http://rt.cpan.org/Public/Bug/Display.html?id=23529)
+      + added:  00_load.t

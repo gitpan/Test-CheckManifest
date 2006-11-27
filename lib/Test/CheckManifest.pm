@@ -10,14 +10,17 @@ use File::Basename;
 use Test::Builder;
 use File::Find;
 
-our $VERSION = '0.8';
+our $VERSION = '0.9';
 
-my $test = Test::Builder->new();
+my $test      = Test::Builder->new();
 my $test_bool = 1;
+my $plan      = 0;
+my $counter   = 0;
 
 sub import {
-    my $self = shift;
+    my $self   = shift;
     my $caller = caller;
+    my %plan   = @_;
 
     for my $func ( qw( ok_manifest ) ) {
         no strict 'refs';
@@ -25,13 +28,18 @@ sub import {
     }
 
     $test->exported_to($caller);
+    $test->plan(%plan);
+    
+    $plan = 1 if(exists $plan{tests});
 }
 
 sub ok_manifest{
     my ($hashref,$msg)    = @_;
     
+    $test->plan(tests => 1) unless $plan;
+    
     my $is_hashref = 1;
-    $is_hashref = 0 unless ref $hashref;
+    $is_hashref = 0 unless ref($hashref);
     
     $msg = $hashref unless $is_hashref;
     
@@ -48,17 +56,17 @@ sub ok_manifest{
                         $hashref->{bool} && 
                         $hashref->{bool} =~ m/^and$/i ?
                                'and' :
-    			       'or'; 
-			       
+                               'or'; 
+                   
     push @$arref, @{$hashref->{exclude}} if($is_hashref and
                                             exists $hashref->{exclude} and 
-                                            ref $hashref->{exclude} eq 'ARRAY');
+                                            ref($hashref->{exclude}) eq 'ARRAY');
     
     for(@$arref){
-        croak 'path in excluded array must be "absolut"' unless m!^/!;
-	my $path = $home . $_;
+        croak 'path in excluded array must be "absolute"' unless m!^/!;
+        my $path = $home . $_;
+        next unless -e $path;
         $_ = Cwd::realpath($path);
-	croak "invalid path: $path" unless defined;
     }
     
     @$arref = grep { defined }@$arref;
@@ -68,7 +76,7 @@ sub ok_manifest{
         $msg  = "can't open $manifest";
     }
     else{
-        my @files = <$fh>;
+        my @files = grep{$_ !~ /^\s*$/}<$fh>;
         close $fh;
     
         chomp @files;
@@ -84,32 +92,30 @@ sub ok_manifest{
         }
     
         my (@dir_files,%files_hash,%excluded);
-	@files_hash{@files} = ();
-	
+        @files_hash{@files} = ();
+    
         find({no_chdir => 1,
           wanted   => sub{ my $file         = $File::Find::name;
-	                   my $is_excluded  = _is_excluded($_,$arref,$filter,$comb);
-                           push(@dir_files,Cwd::realpath($file)) if -f $File::Find::name 
-                                                                    and !$is_excluded;
-                           $excluded{$file} = 1 if -f $File::Find::name 
-			                           and $is_excluded}},$home);
+                           my $is_excluded  = _is_excluded($file,$arref,$filter,$comb);
+                           push(@dir_files,Cwd::realpath($file)) if -f $file and !$is_excluded;
+                           $excluded{$file} = 1 if -f $file and $is_excluded}},$home);
 
-	
-        #print STDERR Dumper(\@files,\@dir_files);
+    
+        #print STDERR ">>",++$counter,":",Dumper(\@files,\@dir_files);
         CHECK: for my $file(@dir_files){
             for my $check(@files){
-	        if($file eq $check){
-		    delete $files_hash{$check};
+                if($file eq $check){
+                    delete $files_hash{$check};
                     next CHECK;
-		}
+                }
             }
             push(@missing_files,$file);
             $bool = 0;
         }
-	
-	delete $files_hash{$_} for keys %excluded;
-	@files_plus = keys %files_hash;
-	$bool = 0 if scalar @files_plus > 0;	
+    
+        delete $files_hash{$_} for keys %excluded;
+        @files_plus = keys %files_hash;
+        $bool = 0 if scalar @files_plus > 0;    
     }
     
     my $diag = 'The following files are not named in the MANIFEST file: '.
@@ -125,23 +131,24 @@ sub ok_manifest{
 sub _not_ok_manifest{
     $test_bool = 0;
     ok_manifest(@_);
+    $test_bool = 1;
 }
 
 sub _is_excluded{
     my ($file,$dirref,$filter,$bool) = @_;
     my @excluded_files = qw(pm_to_blib Makefile META.yml);
         
-    my   @matches = grep{$file =~ /$_$/    }@excluded_files;
+    my @matches = grep{$file =~ /$_$/}@excluded_files;
     
     if($bool eq 'or'){
-        push @matches, $file if grep{ref $_ and ref $_ =~ /Regexp/ and $file =~ $_}@$filter;
-        push @matches, $file if grep{not ref $_ and $file =~ /^\Q$_\E/}@$dirref;
+        push @matches, $file if grep{ref($_) and ref($_) eq 'Regexp' and $file =~ /$_/}@$filter;
+        push @matches, $file if grep{$file =~ /^\Q$_\E/}@$dirref;
     }
     else{
-        if(grep{$file =~ $_ and ref $_ and ref $_ =~ /Regexp/}@$filter and
-	   grep{$file =~ /^\Q$_\E/ and not ref $_}@$dirref){
-	    push @matches, $file;
-	}
+        if(grep{$file =~ /$_/ and ref($_) and ref($_) eq 'Regexp'}@$filter and
+           grep{$file =~ /^\Q$_\E/ and not ref($_)}@$dirref){
+            push @matches, $file;
+        }
     }
     
     return scalar @matches;
@@ -206,7 +213,7 @@ You can also combine "filter" and "exclude" with 'and' or 'or' default is 'or':
 
   ok_manifest({exclude => ['/var/test'], 
                filter  => [qr/\.svn/], 
-	       bool    => 'and'});
+               bool    => 'and'});
 
 These files have to be named in the C<MANIFEST>:
 
@@ -229,6 +236,11 @@ These files not:
 =item * /var/test/file.svn
 
 =back
+
+=head1 ACKNOWLEDGEMENT
+
+Great thanks to Christopher H. Laco, who did a lot of testing stuff for me and
+he reported some bugs to RT.
 
 =head1 AUTHOR
 

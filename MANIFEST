@@ -2,9 +2,10 @@ Changes
 Makefile.PL
 MANIFEST
 README
-t/Test-CheckManifest.t
-t/CheckManifest_Pod.t
-t/CheckManifest_Pod_Coverage.t
+t/00_load.t
+t/01_selftest.t
 t/98_boilerplate.t
+t/99_pod.t
+t/99_pod_coverage.t
 lib/Test/CheckManifest.pm
 META.yml                                 Module meta-data (added by MakeMaker)
