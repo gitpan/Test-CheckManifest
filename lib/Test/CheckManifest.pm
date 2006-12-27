@@ -10,7 +10,7 @@ use File::Basename;
 use Test::Builder;
 use File::Find;
 
-our $VERSION = '0.9';
+our $VERSION = '1.0';
 
 my $test      = Test::Builder->new();
 my $test_bool = 1;
@@ -50,8 +50,9 @@ sub ok_manifest{
     
     my @missing_files = ();
     my @files_plus    = ();
-    my $arref         = ['/blib'];
-    my $filter        = $is_hashref ? $hashref->{filter}  : [];
+    my $arref         = ['/blib' , '/_build'];
+    my $filter        = $is_hashref && 
+                        $hashref->{filter} ? $hashref->{filter}  : [];
     my $comb          = $is_hashref && 
                         $hashref->{bool} && 
                         $hashref->{bool} =~ m/^and$/i ?
@@ -76,7 +77,7 @@ sub ok_manifest{
         $msg  = "can't open $manifest";
     }
     else{
-        my @files = grep{$_ !~ /^\s*$/}<$fh>;
+        my @files = grep{!/^\s*$/ and !/^META\.yml/}<$fh>;
         close $fh;
     
         chomp @files;
@@ -88,6 +89,7 @@ sub ok_manifest{
     
         for my $tfile(@files){
             $tfile = (split(/\s{2,}/,$tfile,2))[0];
+            next unless -e $home . '/' . $tfile;
             $tfile = Cwd::realpath($home . '/' . $tfile);
         }
     
@@ -136,7 +138,8 @@ sub _not_ok_manifest{
 
 sub _is_excluded{
     my ($file,$dirref,$filter,$bool) = @_;
-    my @excluded_files = qw(pm_to_blib Makefile META.yml);
+    my @excluded_files = qw(pm_to_blib Makefile META.yml Build pod2htmd.tmp
+                            pod2htmi.tmp Build.bat .cvsignore);
         
     my @matches = grep{$file =~ /$_$/}@excluded_files;
     

@@ -39,3 +39,6 @@ Revision history for Perl extension Test::CheckManifest.
       - bugfix: "filter" to exclude files that match on specific regexp from test
                 (http://rt.cpan.org/Public/Bug/Display.html?id=23529)
       + added:  00_load.t
+
+1.0   Wed Dec 27 12:15:39 2006
+      - bugfix: ok_manifest excludes files created by Module::Build
