@@ -17,7 +17,7 @@ my $home = dirname(File::Spec->rel2abs($0));
 
 
 # untaint
-if ($home =~ /^([-\@\w.\/\\: ]+)$/) {
+if ($home =~ /^([-\@\w.\/\\: ~]+)$/) {
     $home = $1;
 } 
 else {

@@ -42,3 +42,10 @@ Revision history for Perl extension Test::CheckManifest.
 
 1.0   Wed Dec 27 12:15:39 2006
       - bugfix: ok_manifest excludes files created by Module::Build
+
+1.01  Sat Dec 29 00:28:13 2007
+      - fixes in test scripts
+        - require 5.006001
+        - allow more characters in path
+      + added license to Makefile.PL
+      + changed META.yml
