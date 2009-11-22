@@ -1,9 +1,10 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         Test-CheckManifest
-version:      1.01
-version_from: lib/Test/CheckManifest.pm
-installdirs:  site
+--- #YAML:1.0
+name:                Test-CheckManifest
+version:             1.1
+abstract:            Check if your Manifest matches your distro
+license:             artistic_2
+generated_by:        ExtUtils::MakeMaker version 6.31
+distribution_type:   module
 requires:
     Carp:                          0
     Cwd:                           0
@@ -11,6 +12,8 @@ requires:
     File::Find:                    0
     File::Spec:                    0
     Test::Builder:                 0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30_01
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
+    version: 1.2
+author:
+    - Renee Baecker <module@renee-baecker.de>
