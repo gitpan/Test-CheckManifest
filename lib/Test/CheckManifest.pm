@@ -10,7 +10,7 @@ use File::Basename;
 use Test::Builder;
 use File::Find;
 
-our $VERSION = '1.2';
+our $VERSION = '1.21';
 
 my $test      = Test::Builder->new();
 my $test_bool = 1;
@@ -193,6 +193,8 @@ sub _is_excluded{
 
 sub _read_skip {
     my ($skip, $msg, $bool) = @_;
+
+    return [] unless -e $skip;
     
     my @files;
     if( -e $skip and not open my $skip_fh, '<', $skip ) {
