@@ -10,7 +10,7 @@ use File::Basename;
 use Test::Builder;
 use File::Find;
 
-our $VERSION = '1.22';
+our $VERSION = '1.23';
 
 my $test      = Test::Builder->new();
 my $test_bool = 1;
@@ -167,7 +167,7 @@ sub _not_ok_manifest{
 sub _is_excluded{
     my ($file,$dirref,$filter,$bool,$files_in_skip,$home) = @_;
     my @excluded_files = qw(pm_to_blib Makefile META.yml Build pod2htmd.tmp
-                            pod2htmi.tmp Build.bat .cvsignore);
+                            pod2htmi.tmp Build.bat .cvsignore MYMETA.json);
 
     if ( $files_in_skip and 'ARRAY' eq ref $files_in_skip ) {
         (my $local_file = $file) =~ s{\Q$home\E/?}{};
@@ -229,11 +229,17 @@ sub _read_skip {
 }
 
 1;
-__END__
+
+
+=pod
 
 =head1 NAME
 
-Test::CheckManifest - Check if your Manifest matches your distro
+Test::CheckManifest
+
+=head1 VERSION
+
+version 1.23
 
 =head1 SYNOPSIS
 
@@ -247,6 +253,10 @@ C<Test::CheckManifest>
 =head2 EXPORT
 
 There is only one method exported: C<ok_manifest>
+
+=head1 NAME
+
+Test::CheckManifest - Check if your Manifest matches your distro
 
 =head1 METHODS
 
@@ -330,10 +340,25 @@ Renee Baecker, E<lt>module@renee-baecker.deE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 - 2009 by Renee Baecker
+Copyright (C) 2006 - 2011 by Renee Baecker
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Artistic License 2.0
 
+=head1 AUTHOR
+
+Renee Baecker <module@renee-baecker.de>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is Copyright (c) 2011 by Renee Baecker.
+
+This is free software, licensed under:
+
+  The Artistic License 2.0
 
 =cut
+
+
+__END__
+

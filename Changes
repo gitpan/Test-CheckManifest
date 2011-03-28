@@ -1,5 +1,13 @@
 Revision history for Perl extension Test::CheckManifest.
 
+1.23  Mon Mar 28 2011
+      + CPAN toolchain now creates MYMETA.yml and META.json. These files are in
+      the list of recognized files now.
+      + clarify license of this module (In README the Perl license was mentioned where
+      in all other files Artistic 2.0 was mentioned)
+      + switched to Dist::Zilla
+      + removed tests that are created by Dist::Zilla
+
 1.22  Thu Jul 29 2010
       + fix a bug that appears when there is no MANIFEST.SKIP
 
