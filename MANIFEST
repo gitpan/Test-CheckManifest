@@ -7,6 +7,7 @@ LICENSE
 t/00_load.t
 t/01_selftest.t
 t/98_boilerplate.t
+'t/file with whitespaces.txt'
 
 xt/release/pod-syntax.t
 xt/release/pod-coverage.t

@@ -10,7 +10,7 @@ use File::Basename;
 use Test::Builder;
 use File::Find;
 
-our $VERSION = '1.23';
+our $VERSION = '1.24';
 
 my $test      = Test::Builder->new();
 my $test_bool = 1;
@@ -84,13 +84,7 @@ sub ok_manifest{
         my $files_in_skip = _read_skip( $skip, \$msg, \$bool );
         last unless $files_in_skip;
             
-        my @files;
-        while( my $fh_line = <$fh> ){
-            if( $fh_line =~ /^\s*([^\s#]\S*)/ and $fh_line !~ /^META\.yml/ ){
-                push @files, $1;
-            }
-        }
-        #my @files = grep{!/^\s*$/ and !/^META\.yml/}<$fh>;
+        my @files = _read_file( $fh );
         close $fh;
     
         chomp @files;
@@ -158,6 +152,32 @@ sub ok_manifest{
     $test->diag($plus) if scalar @files_plus    >= 1 and $test_bool == 1;
 }
 
+sub _read_file {
+    my ($fh) = @_;
+    
+    my @files;
+    while( my $fh_line = <$fh> ){
+        chomp $fh_line;
+        
+        next if $fh_line =~ m{ \A \s* \# }x;
+        
+        my ($file);
+        
+        if ( ($file) = $fh_line =~ /^'(\\[\\']|.+)+'\s*(.*)/) {
+            $file =~ s/\\([\\'])/$1/g;
+        }
+        else {
+            ($file) = $fh_line =~ /^(\S+)\s*(.*)/;
+        }
+
+        next unless $file;
+        
+        push @files, $file;
+    }
+    
+    return @files;
+}
+
 sub _not_ok_manifest{
     $test_bool = 0;
     ok_manifest(@_);
@@ -205,24 +225,7 @@ sub _read_skip {
         return;
     }
     else {
-        while ( my $line = <$skip_fh> ) {
-            chomp $line;
-            
-            next if $line =~ m{ \A \s* \# }x;
-            
-            my ($file,$comment);
-            
-            if (($file, $comment) = $line =~ /^'(\\[\\']|.+)+'\s*(.*)/) {
-                $file =~ s/\\([\\'])/$1/g;
-            }
-            else {
-                ($file, $comment) = $line =~ /^(\S+)\s*(.*)/;
-            }
-
-            next unless $file;
-            
-            push @files, $file;
-        }
+        @files = _read_file( $skip_fh );
     }
 
     return \@files;
@@ -239,7 +242,7 @@ Test::CheckManifest
 
 =head1 VERSION
 
-version 1.23
+version 1.24
 
 =head1 SYNOPSIS
 
