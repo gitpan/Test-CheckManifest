@@ -4,32 +4,32 @@ use warnings;
 
 
 
-use ExtUtils::MakeMaker 6.31;
+use ExtUtils::MakeMaker 6.30;
 
 
 
 my %WriteMakefileArgs = (
-  'ABSTRACT' => 'Check if your Manifest matches your distro',
-  'AUTHOR' => 'Renee Baecker <module@renee-baecker.de>',
-  'BUILD_REQUIRES' => {},
-  'CONFIGURE_REQUIRES' => {
-    'ExtUtils::MakeMaker' => '6.31'
+  "ABSTRACT" => "Check if your Manifest matches your distro",
+  "AUTHOR" => "Renee Baecker <module\@renee-baecker.de>",
+  "BUILD_REQUIRES" => {},
+  "CONFIGURE_REQUIRES" => {
+    "ExtUtils::MakeMaker" => "6.30"
   },
-  'DISTNAME' => 'Test-CheckManifest',
-  'EXE_FILES' => [],
-  'LICENSE' => 'artistic_2',
-  'NAME' => 'Test::CheckManifest',
-  'PREREQ_PM' => {
-    'Carp' => '0',
-    'Cwd' => '0',
-    'File::Basename' => '0',
-    'File::Find' => '0',
-    'File::Spec' => '0',
-    'Test::Builder' => '0'
+  "DISTNAME" => "Test-CheckManifest",
+  "EXE_FILES" => [],
+  "LICENSE" => "artistic_2",
+  "NAME" => "Test::CheckManifest",
+  "PREREQ_PM" => {
+    "Carp" => 0,
+    "Cwd" => 0,
+    "File::Basename" => 0,
+    "File::Find" => 0,
+    "File::Spec" => 0,
+    "Test::Builder" => 0
   },
-  'VERSION' => '1.24',
-  'test' => {
-    'TESTS' => 't/*.t'
+  "VERSION" => "1.25",
+  "test" => {
+    "TESTS" => "t/*.t"
   }
 );
 

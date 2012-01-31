@@ -1,7 +1,7 @@
 
 
 This archive contains the distribution Test-CheckManifest,
-version 1.24:
+version 1.25:
 
   Check if your Manifest matches your distro
 
@@ -9,6 +9,6 @@ This software is Copyright (c) 2011 by Renee Baecker.
 
 This is free software, licensed under:
 
-  The Artistic License 2.0
+  The Artistic License 2.0 (GPL Compatible)
 
 
