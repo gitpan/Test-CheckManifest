@@ -12,7 +12,7 @@ use File::Basename;
 use Test::Builder;
 use File::Find;
 
-our $VERSION = '1.25_01';
+our $VERSION = '1.26';
 
 my $test      = Test::Builder->new();
 my $test_bool = 1;
@@ -260,7 +260,7 @@ Test::CheckManifest - Check if your Manifest matches your distro
 
 =head1 VERSION
 
-version 1.25_01
+version 1.26
 
 =head1 SYNOPSIS
 
