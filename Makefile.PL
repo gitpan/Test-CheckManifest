@@ -10,7 +10,7 @@ use ExtUtils::MakeMaker 6.30;
 
 my %WriteMakefileArgs = (
   "ABSTRACT" => "Check if your Manifest matches your distro",
-  "AUTHOR" => "Renee Baecker <module\@renee-baecker.de>",
+  "AUTHOR" => "Renee Baecker <reneeb\@cpan.org>",
   "BUILD_REQUIRES" => {},
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.30"
@@ -27,12 +27,26 @@ my %WriteMakefileArgs = (
     "File::Spec" => 0,
     "Test::Builder" => 0
   },
-  "VERSION" => "1.26",
+  "TEST_REQUIRES" => {},
+  "VERSION" => "1.27",
   "test" => {
-    "TESTS" => "t/*.t t/extra/*.t"
+    "TESTS" => "t/*.t t/extra/*.t t/xt/*.t"
   }
 );
 
+
+unless ( eval { ExtUtils::MakeMaker->VERSION(6.63_03) } ) {
+  my $tr = delete $WriteMakefileArgs{TEST_REQUIRES};
+  my $br = $WriteMakefileArgs{BUILD_REQUIRES};
+  for my $mod ( keys %$tr ) {
+    if ( exists $br->{$mod} ) {
+      $br->{$mod} = $tr->{$mod} if $tr->{$mod} > $br->{$mod};
+    }
+    else {
+      $br->{$mod} = $tr->{$mod};
+    }
+  }
+}
 
 unless ( eval { ExtUtils::MakeMaker->VERSION(6.56) } ) {
   my $br = delete $WriteMakefileArgs{BUILD_REQUIRES};
