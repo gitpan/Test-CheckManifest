@@ -1,18 +1,12 @@
 Changes
+LICENSE
 MANIFEST
-
+META.yml
+Makefile.PL
+README
+lib/Test/CheckManifest.pm
 t/00_load.t
 t/01_selftest.t
-t/xt/02_issue1.t
-'t/file with whitespaces.txt'
-
 t/extra/02_test_in_subdirectory.t
-
-lib/Test/CheckManifest.pm
-
-dist.ini    # selftest
-README      # selftest
-LICENSE     # selftest
-MYMETA.json # selftest
-META.yml    # selftest
-Makefile.PL # selftest
+'t/file with whitespaces.txt'
+t/xt/02_issue1.t
