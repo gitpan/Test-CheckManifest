@@ -12,7 +12,7 @@ use File::Basename;
 use Test::Builder;
 use File::Find;
 
-our $VERSION = '1.28';
+our $VERSION = '1.29';
 our $VERBOSE = 1;
 
 my $test      = Test::Builder->new();
@@ -276,13 +276,15 @@ __END__
 
 =pod
 
+=encoding UTF-8
+
 =head1 NAME
 
 Test::CheckManifest - Check if your Manifest matches your distro
 
 =head1 VERSION
 
-version 1.28
+version 1.29
 
 =head1 SYNOPSIS
 
@@ -356,6 +358,10 @@ These files not:
 
 =back
 
+By default, C<ok_manifest> will look for the file C<MANIFEST> in the current working directory (which is how tests are traditionally run). If you wish to specify a different directory, you may pass the C<file> or C<dir> parameters, for example:
+
+  ok_manifest({dir => '/path/to/my/dist/'});
+
 =head1 EXCLUDING FILES
 
 Beside C<filter> and C<exclude> there is another way to exclude files:
@@ -375,7 +381,7 @@ Renee Baecker <reneeb@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2014 by Renee Baecker.
+This software is Copyright (c) 2015 by Renee Baecker.
 
 This is free software, licensed under:
 
